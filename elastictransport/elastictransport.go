@@ -50,6 +50,7 @@ var (
 //
 type Interface interface {
 	Perform(*http.Request) (*http.Response, error)
+	BaseNodeURL() (*url.URL, error)
 }
 
 // Config represents the configuration of HTTP client.
@@ -430,6 +431,18 @@ func (c *Client) Perform(req *http.Request) (*http.Response, error) {
 //
 func (c *Client) URLs() []*url.URL {
 	return c.pool.URLs()
+}
+
+// BaseNodeURL provides the info of the first node in the pool
+// the Host of the request is then overridden in the Perform method
+// using setReqURL.
+//
+func (c *Client) BaseNodeURL() (*url.URL, error) {
+	if len(c.URLs()) == 0 {
+		return nil, errors.New("url pool is empty")
+	}
+
+	return c.URLs()[0], nil
 }
 
 func (c *Client) setReqURL(u *url.URL, req *http.Request) *http.Request {
